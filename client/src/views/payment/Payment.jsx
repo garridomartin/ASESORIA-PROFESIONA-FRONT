@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { initMercadoPago } from '@mercadopago/sdk-react';
 import { removeAll } from '../../Redux/actions';
-const URL_BASE = import.meta.env.VITE_URL_BASE;
+//const URL_BASE = import.meta.env.VITE_URL_BASE;
 initMercadoPago(import.meta.env.VITE_MP_SECRET);
-
+const URL_BASE = 'http://localhost:3001';
 const Payment = () => {
   const items = useSelector((state) => state.items);
   const totalPrice = items.reduce((acc, curr) => acc + curr.price, 0);
