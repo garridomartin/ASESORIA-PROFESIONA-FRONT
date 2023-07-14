@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   GET_SERVICES,
   CREATE_SERVICE,
@@ -27,11 +28,11 @@ import {
   ALL_SERVICES_ADMIN,
   CONTACT_US,
   BOUGHT_PRODUCTS,
-  ID_REVIEW
+  ID_REVIEW,
 } from './actions-types';
 import axios from 'axios';
 
-const URL_BASE = import.meta.env.VITE_URL_BASE;
+const URL_BASE = 'http://localhost:3001'; /*import.meta.env.VITE_URL_BASE;*/
 
 export const getData = () => {
   return async (dispatch) => {
@@ -129,25 +130,60 @@ export const handleLogIn = () => {
   return (dispatch) => {
     // Abrir una nueva ventana para el inicio de sesión de Google
     const popup = window.open(
-      `${URL_BASE}/auth`,
+      'http://localhost:3001/auth/',
       'Login',
       'width=500,height=500'
     );
     window.addEventListener('message', (event) => {
-      if (event.origin === URL_BASE) {
-        const { name, email, profilePict, isAdmin, isSuperAdmin } = event.data;
+      console.log(event.data);
+      if (event.origin === 'http://localhost:3001') {
+        const { name, email, profilePict, isAdmin, isSuperAdmin, token } =
+          event.data;
         dispatch(
-          loginSuccess({ name, email, profilePict, isAdmin, isSuperAdmin })
+          loginSuccess({
+            name,
+            email,
+            profilePict,
+            isAdmin,
+            isSuperAdmin,
+            token,
+          })
         );
-        //popup.close();
+        popup.close();
       }
     });
   };
 };
 
+/*
+    const user = document.cookie.split('user=').pop().trim();
+    const decodedString = decodeURIComponent(user);
+    const trueDecoded = decodedString.split('token=').shift().trim();
+    console.log(trueDecoded);
+    const jsonObject = JSON.parse(trueDecoded);
+    console.log(jsonObject);
+    const name = jsonObject.name;
+    const profilePict = jsonObject.profilePict;
+    const isAdmin = jsonObject.isAdmin;
+    const isSuperAdmin = jsonObject.isSuperAdmin;
+    const response = {
+      name: name,
+      profilePict: profilePict,
+      isAdmin: isAdmin,
+      isSuperAdmin: isSuperAdmin,
+    };
+*/
+
+/*
 export const loginSuccess = (user) => {
   console.log(user);
   localStorage.setItem('token', document.cookie.split('token=').pop().trim());
+  return { type: LOGIN_SUCCESS, payload: user };
+};*/
+
+export const loginSuccess = (user) => {
+  console.log(user);
+  localStorage.setItem('token', user.token);
   return { type: LOGIN_SUCCESS, payload: user };
 };
 
@@ -272,11 +308,11 @@ export const getAllUsers = () => {
 
 export const postComentario = (review) => {
   return async (dispatch) => {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: ` Bearer ${token}` } };
-      const response = await axios.post( `${URL_BASE}/review/`, review, config);
-      console.log(response)
-      return dispatch({ type: POST_COMENTARIO, payload: response.data });
+    const token = localStorage.getItem('token');
+    const config = { headers: { Authorization: ` Bearer ${token}` } };
+    const response = await axios.post(`${URL_BASE}/review/`, review, config);
+    console.log(response);
+    return dispatch({ type: POST_COMENTARIO, payload: response.data });
   };
 };
 
@@ -330,12 +366,15 @@ export const sendContact = (contact) => {
 export const boughtProducts = () => {
   return async (dispatch) => {
     const token = localStorage.getItem('token');
-    const config = { headers : { Authorization: ` Bearer ${token}`}};
-    const response = await axios.get(`${URL_BASE}/getSoldServiceByUser/`, config);
-    return dispatch({type: BOUGHT_PRODUCTS, payload: response.data});
+    const config = { headers: { Authorization: ` Bearer ${token}` } };
+    const response = await axios.get(
+      `${URL_BASE}/getSoldServiceByUser/`,
+      config
+    );
+    return dispatch({ type: BOUGHT_PRODUCTS, payload: response.data });
   };
 };
 
 export const idReview = (idService) => {
-  return {type: ID_REVIEW, payload: idService}
+  return { type: ID_REVIEW, payload: idService };
 };
